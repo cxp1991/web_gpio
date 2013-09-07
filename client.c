@@ -97,16 +97,17 @@ int main(int argc , char *argv[])
 	char *serverAddress = "192.168.7.1";
 	int  serverPort = 8888;
 
-	memset(message,'\0',sizeof(message));
-	memset(server_reply,'\0',sizeof(server_reply));
-	memset(client_information,'\0',sizeof(client_information));
-	memset(clientData.HostName,'\0',sizeof(clientData.HostName));
-	memset(clientData.MacAddress,'\0',sizeof(clientData.MacAddress));
-	memset(clientData.TimeConnectServer,'\0',sizeof(clientData.TimeConnectServer));
-	memset(clientData.LocalIPAddress,'\0',sizeof(clientData.LocalIPAddress));
-
 	while (1)
 	{
+		// put reset buffer here use for reconnect to server after server crash
+		memset(message,'\0',sizeof(message));
+		memset(server_reply,'\0',sizeof(server_reply));
+		memset(client_information,'\0',sizeof(client_information));
+		memset(clientData.HostName,'\0',sizeof(clientData.HostName));
+		memset(clientData.MacAddress,'\0',sizeof(clientData.MacAddress));
+		memset(clientData.TimeConnectServer,'\0',sizeof(clientData.TimeConnectServer));
+		memset(clientData.LocalIPAddress,'\0',sizeof(clientData.LocalIPAddress));
+
 		// Get client information
 		strcpy(clientData.HostName, getyourhostname());
 		strcpy(clientData.MacAddress, getmac("eth0"));
@@ -121,7 +122,7 @@ int main(int argc , char *argv[])
 		//strcat(client_information,"&");
 		//strcat(client_information, clientData.LocalIPAddress);
 		//strcat(client_information,"&");
-		puts(client_information);
+		printf("client information = %s\n", client_information);
 
 		//Create socket
 		socket_desc = socket (AF_INET , SOCK_STREAM , 0);
@@ -169,7 +170,7 @@ int main(int argc , char *argv[])
 				break;
 			}
 
-			puts (server_reply);
+			printf("server reply = %s\n", server_reply);
 
 			// Control gpios
 			if (!strcmp (server_reply,"0"))
