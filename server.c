@@ -140,31 +140,48 @@ void *connection_handler (void *socket_desc)
             for(i = 0; i < num_fields; i++) 
             { 
                 //printf("%s ", row[i] ? row[i] : "NULL"); 
-                onoff = row[1];
+                onoff = row[3];
                 //printf("%s\n", onoff);
             } 
             //printf("\n"); 
         }
       
         mysql_free_result(result);
-
+        
+        temp = "";
         // Decide turn on/off led
-        if ( !strcmp(onoff,"Off") )
+        if (onoff != NULL)
         {
-            temp = "0"; // off
-        }
-        else
-        {
-            temp = "1"; // on
+            if ( !strcmp(onoff,"Off") )
+            {
+                temp = "0"; // off
+            }
+            else
+            {
+                temp = "1"; // on
+            }
         }
 
         // Only send to client when client choose the different value
         if (strcmp(previous_value,temp))
         {
+            printf("temp = %s\n", temp);
             strncpy(sendbuf, temp, strlen(temp));
             if(-1 == send(sock , sendbuf, sizeof(sendbuf), 0))
             {
                 fprintf(stderr,"Client is now disconnected!\n");
+
+                // Delete client's information out of the database
+                memset(mySQLcommand,'\0',sizeof(mySQLcommand));
+                sprintf(mySQLcommand,"DELETE FROM %s WHERE ID='%s'", table_name, clientData.MacAddress); 
+               
+                if (mysql_query(con, mySQLcommand)) 
+                {
+                    fprintf(stderr, "%s\n", mysql_error(con));
+                    mysql_close(con);
+                    return;
+                }
+
                 return;
             }
 

@@ -12,7 +12,7 @@
 		$password="cxphong"; // Mysql password
 		$db_name="boards"; // Database name
 		$tbl_name="panda_board_connecting"; // Table name
-		$ID='001';
+		$ID='c8:a0:30:ae:e4:50';
 
 		// Connect to server and select databse.
 		mysql_connect("$host", "$username", "$password")or die("cannot connect");
@@ -22,11 +22,11 @@
 
 		if ($answer == "On") 
 		{          
-		   	mysql_query("UPDATE $tbl_name SET action='On' WHERE ID=$ID");   
+		   	mysql_query("UPDATE $tbl_name SET Control='On'");   
 		}
 		else 
 		{
-	    	    	mysql_query("UPDATE $tbl_name SET action='Off' WHERE ID=$ID"); 
+	    	    	mysql_query("UPDATE $tbl_name SET Control='Off'"); 
 		}	
 	
 	}
