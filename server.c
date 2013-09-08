@@ -1,6 +1,6 @@
 /*
 *
-    Fix : 
+    Fix: server write information about connected clients into database 
     Build:
         gcc -o server server.c `mysql_config --cflags --libs`
 
@@ -33,6 +33,7 @@ char *database_servername = "localhost";
 char *database_username   = "root";
 char *database_password   = "cxphong";
 char *database_name       = "boards";
+char *table_name          = "panda_board_connecting";
 
 /*
  * This will handle connection for each client
@@ -44,13 +45,14 @@ void *connection_handler (void *socket_desc)
     int sock = *(int*)socket_desc;
     char *onoff = NULL;
     char previous_value[5];
-    char recbuf[BUFFER_SIZE], sendbuf[BUFFER_SIZE];
+    char recbuf[BUFFER_SIZE], sendbuf[BUFFER_SIZE], mySQLcommand[BUFFER_SIZE];
     char *temp = NULL;
     char *pch = NULL;
     CLIENT_DATA clientData;
 
     memset(sendbuf,'\0',sizeof(sendbuf));
     memset(recbuf,'\0',sizeof(recbuf));
+    memset(mySQLcommand,'\0',sizeof(mySQLcommand));
     memset(previous_value,'\0',sizeof(previous_value));
     memset(clientData.HostName,'\0',sizeof(clientData.HostName));
     memset(clientData.MacAddress,'\0',sizeof(clientData.MacAddress));
@@ -104,12 +106,24 @@ void *connection_handler (void *socket_desc)
     }
 
     // Write client information into database
+    sprintf(mySQLcommand,"INSERT INTO %s (ID, HostName, TimeStartConnect) VALUES('%s', '%s', '%s')", 
+           table_name, clientData.MacAddress, clientData.HostName, clientData.TimeConnectServer);
+
+    if (mysql_query(con, mySQLcommand)) 
+    {
+        fprintf(stderr, "%s\n", mysql_error(con));
+        mysql_close(con);
+        return;
+    }
 
     // Always check the database
     while (1)
     {
         // Read data from mysql database
-        if (mysql_query(con, "SELECT * FROM panda_board_connecting")) 
+        memset(mySQLcommand,'\0',sizeof(mySQLcommand));
+        sprintf(mySQLcommand,"SELECT * FROM %s", table_name); 
+       
+        if (mysql_query(con, mySQLcommand)) 
         {
             fprintf(stderr, "%s\n", mysql_error(con));
             mysql_close(con);
@@ -156,7 +170,7 @@ void *connection_handler (void *socket_desc)
 
             //printf("temp = %s\n", temp);
             //printf("previous_value = %s\n", previous_value);
-            puts("Sended!");
+            puts("Sent!");
             memcpy(previous_value,temp,strlen(temp));
         }
 
